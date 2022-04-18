@@ -28,6 +28,7 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     bool private m_IsMintable = false;
     bool private m_IsPublic = false;
+    bool private m_IsActive = false;
     uint256 private m_SaleDate = 1648756800;
 
     string private m_baseURI;
@@ -55,6 +56,8 @@ contract EverLand is ERC721Enumerable, Ownable {
     mapping(address => WhiteListAmounts) public m_WhiteListAmounts;
     mapping(uint256 => bool) private m_BurnList;
 
+    Auction[] private m_AuctionsData;
+
     uint256 private gaiaUSDC =
         (((79357452196816930849001 * (10**18)) /
             uint256(1868548345305467327315244)) *
@@ -76,6 +79,19 @@ contract EverLand is ERC721Enumerable, Ownable {
         super._beforeTokenTransfer(from, to, tokenId);
         if (from != address(0) && m_Auctions[tokenId].creator == from) {
             delete m_Auctions[tokenId];
+            uint256 flag = 0;
+            uint256 length = m_AuctionsData.length;
+            while (length > 0) {
+                if (m_AuctionsData[length - 1].id == tokenId) {
+                    m_AuctionsData[length - 1] = m_AuctionsData[
+                        m_AuctionsData.length - 1
+                    ];
+                    flag = 1;
+                    break;
+                }
+                length = length - 1;
+            }
+            if (flag == 1) m_AuctionsData.pop();
         }
     }
 
@@ -130,11 +146,16 @@ contract EverLand is ERC721Enumerable, Ownable {
             "Can only mint 200 tokens at a time"
         );
         // uint256 gaiaUSDC = getTokenPrice();
+        uint8[5] memory _prices = [1, 3, 6, 12, 24];
         uint256 price = _landType == 1
-            ? ((m_EpicPrice * _countOfLands * _landSize * _landSize) *
-                (10**36)) / gaiaUSDC
-            : ((m_RegularPrice * _countOfLands * _landSize * _landSize) *
-                (10**36)) / gaiaUSDC;
+            ? ((m_EpicPrice *
+                _countOfLands *
+                _prices[_landSize] *
+                _prices[_landSize]) * (10**36)) / gaiaUSDC
+            : ((m_RegularPrice *
+                _countOfLands *
+                _prices[_landSize] *
+                _prices[_landSize]) * (10**36)) / gaiaUSDC;
         require(IERC20(PGAIAA).transferFrom(msg.sender, address(this), price));
         _safeMintMultiple(msg.sender, _countOfLands, _landSize, _landType);
     }
@@ -171,7 +192,7 @@ contract EverLand is ERC721Enumerable, Ownable {
             if (data.landType == 1) {
                 epicLands = epicLands + data.landSize * data.landSize;
             } else {
-                regularLands = epicLands + data.landSize * data.landSize;
+                regularLands = regularLands + data.landSize * data.landSize;
             }
         }
         require(
@@ -191,7 +212,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         m_WhiteListAmounts[msg.sender].epic =
             m_WhiteListAmounts[msg.sender].epic +
             epicLands;
-        m_WhiteListAmounts[msg.sender].epic =
+        m_WhiteListAmounts[msg.sender].regular =
             m_WhiteListAmounts[msg.sender].regular +
             regularLands;
 
@@ -294,7 +315,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         uint256 _price,
         uint256 _unit
     ) external {
-        require(m_IsMintable, "Sale must be active to mint GaiaLand");
+        require(m_IsActive, "Sale must be active to mint GaiaLand");
         require(ownerOf(_id) == msg.sender, "sender is not owner");
         require(m_Auctions[_id].id != _id, "Already opened");
         m_Auctions[_id] = Auction({
@@ -303,17 +324,35 @@ contract EverLand is ERC721Enumerable, Ownable {
             creator: msg.sender,
             id: _id
         });
+        Auction memory temp = Auction({
+            price: _price,
+            unit: _unit,
+            creator: msg.sender,
+            id: _id
+        });
+        m_AuctionsData.push(temp);
     }
 
     function closeTrade(uint256 _id) external {
-        require(m_IsMintable, "Sale must be active to mint GaiaLand");
+        require(m_IsActive, "Sale must be active to mint GaiaLand");
         require(ownerOf(_id) == msg.sender, "sender is not owner");
         require(m_Auctions[_id].id == _id, "Already closed");
         delete m_Auctions[_id];
+        uint256 length = m_AuctionsData.length;
+        while (length > 0) {
+            if (m_AuctionsData[length - 1].id == _id) {
+                m_AuctionsData[length - 1] = m_AuctionsData[
+                    m_AuctionsData.length - 1
+                ];
+                break;
+            }
+            length = length - 1;
+        }
+        m_AuctionsData.pop();
     }
 
     function buy(uint256 _id) external payable {
-        require(m_IsMintable, "Sale must be active to mint GaiaLand");
+        require(m_IsActive, "Sale must be active to mint GaiaLand");
         require(ownerOf(_id) != msg.sender, "Can not buy what you own");
         require(m_Auctions[_id].id == _id, "Item not listed currently");
         require(
@@ -331,10 +370,21 @@ contract EverLand is ERC721Enumerable, Ownable {
         payable(_previousOwner).transfer(_sellerValue);
         _transfer(_previousOwner, _newOwner, _id);
         delete m_Auctions[_id];
+        uint256 length = m_AuctionsData.length;
+        while (length > 0) {
+            if (m_AuctionsData[length - 1].id == _id) {
+                m_AuctionsData[length - 1] = m_AuctionsData[
+                    m_AuctionsData.length - 1
+                ];
+                break;
+            }
+            length = length - 1;
+        }
+        m_AuctionsData.pop();
     }
 
     function buyToken(uint256 _id, uint256 _price) external {
-        require(m_IsMintable, "Sale must be active to mint GaiaLand");
+        require(m_IsActive, "Sale must be active to mint GaiaLand");
         require(ownerOf(_id) != msg.sender, "Can not buy what you own");
         require(m_Auctions[_id].id == _id, "Item not listed currently");
         require(m_Auctions[_id].price <= _price, "Error, price is not match");
@@ -362,6 +412,17 @@ contract EverLand is ERC721Enumerable, Ownable {
 
         _transfer(_previousOwner, _newOwner, _id);
         delete m_Auctions[_id];
+        uint256 length = m_AuctionsData.length;
+        while (length > 0) {
+            if (m_AuctionsData[length - 1].id == _id) {
+                m_AuctionsData[length - 1] = m_AuctionsData[
+                    m_AuctionsData.length - 1
+                ];
+                break;
+            }
+            length = length - 1;
+        }
+        m_AuctionsData.pop();
     }
 
     function customReserve(address _address, uint256[] memory ids)
@@ -409,6 +470,7 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     function setMintEnabled(bool _enabled) external onlyOwner {
         m_IsMintable = _enabled;
+        if (_enabled) m_IsActive = _enabled;
     }
 
     function getMintEnabled() external view returns (bool) {
@@ -417,10 +479,19 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     function setPublicMintEnabled(bool _enabled) external onlyOwner {
         m_IsPublic = _enabled;
+        if (_enabled) m_IsActive = _enabled;
     }
 
     function getPublicMintEnabled() external view returns (bool) {
         return m_IsPublic;
+    }
+
+    function setActiveEnabled(bool _enabled) external onlyOwner {
+        m_IsActive = _enabled;
+    }
+
+    function getActiveEnabled() external view returns (bool) {
+        return m_IsActive;
     }
 
     function setSaleDate(uint256 _date) external onlyOwner {
@@ -465,6 +536,10 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     function setBaseURI(string memory _newBaseURI) external onlyOwner {
         m_baseURI = _newBaseURI;
+    }
+
+    function getAuctionsData() external view returns (Auction[] memory) {
+        return m_AuctionsData;
     }
 
     function _baseURI() internal view override returns (string memory) {

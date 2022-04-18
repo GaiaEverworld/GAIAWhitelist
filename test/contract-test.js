@@ -54,7 +54,11 @@ describe("Eever Land Contract", function () {
 
     it("OpenTrade", async function () {
       await everland.connect(addr1).mint(3, 0, 1);
-      expect(await everland.connect(addr1).openTrade(100002, 10, 1));
+      expect(
+        await everland
+          .connect(addr1)
+          .openTrade(100002, "10000000000000000000", 1)
+      );
     });
 
     it("CloseTrade", async function () {
