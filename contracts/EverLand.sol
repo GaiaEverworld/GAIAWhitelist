@@ -131,6 +131,8 @@ contract EverLand is ERC721Enumerable, Ownable {
         uint256 _landSize,
         uint256 _landType
     ) external onlyOwner {
+        require(_landType == 1 || _landType == 0);
+        require(_landSize >= 0 && _landSize < 5);
         _safeMintMultiple(_address, _countOfLands, _landSize, _landType);
     }
 
@@ -145,6 +147,8 @@ contract EverLand is ERC721Enumerable, Ownable {
             _countOfLands > 0 && _countOfLands <= MAX_PURCHASE,
             "Can only mint 200 tokens at a time"
         );
+        require(_landType == 1 || _landType == 0);
+        require(_landSize >= 0 && _landSize < 5);
         // uint256 gaiaUSDC = getTokenPrice();
         uint8[5] memory _prices = [1, 3, 6, 12, 24];
         uint256 price = _landType == 1
@@ -318,6 +322,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         require(m_IsActive, "Sale must be active to mint GaiaLand");
         require(ownerOf(_id) == msg.sender, "sender is not owner");
         require(m_Auctions[_id].id != _id, "Already opened");
+        require(_unit == 1 || _unit == 2);
         m_Auctions[_id] = Auction({
             price: _price,
             unit: _unit,
@@ -370,17 +375,6 @@ contract EverLand is ERC721Enumerable, Ownable {
         payable(_previousOwner).transfer(_sellerValue);
         _transfer(_previousOwner, _newOwner, _id);
         delete m_Auctions[_id];
-        uint256 length = m_AuctionsData.length;
-        while (length > 0) {
-            if (m_AuctionsData[length - 1].id == _id) {
-                m_AuctionsData[length - 1] = m_AuctionsData[
-                    m_AuctionsData.length - 1
-                ];
-                break;
-            }
-            length = length - 1;
-        }
-        m_AuctionsData.pop();
     }
 
     function buyToken(uint256 _id, uint256 _price) external {
@@ -412,17 +406,6 @@ contract EverLand is ERC721Enumerable, Ownable {
 
         _transfer(_previousOwner, _newOwner, _id);
         delete m_Auctions[_id];
-        uint256 length = m_AuctionsData.length;
-        while (length > 0) {
-            if (m_AuctionsData[length - 1].id == _id) {
-                m_AuctionsData[length - 1] = m_AuctionsData[
-                    m_AuctionsData.length - 1
-                ];
-                break;
-            }
-            length = length - 1;
-        }
-        m_AuctionsData.pop();
     }
 
     function customReserve(address _address, uint256[] memory ids)
