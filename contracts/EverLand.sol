@@ -17,7 +17,7 @@ contract EverLand is ERC721Enumerable, Ownable {
     uint256 private constant MAX_SUPPLY = 124884;
     uint256 private constant MAX_PURCHASE = 200;
 
-    address private PGAIAA = 0xa8b062dE9dB7D22D6Ad6ef64Dc6FE53B3cba4A80; // 0x723B17718289A91AF252D616DE2C77944962d122;
+    address private PGAIAA = 0x723B17718289A91AF252D616DE2C77944962d122;
 
     uint256 private m_EpicPrice = 350; // $350
     uint256 private m_RegularPrice = 175; // $175
@@ -58,12 +58,6 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     Auction[] private m_AuctionsData;
 
-    uint256 private gaiaUSDC =
-        (((79357452196816930849001 * (10**18)) /
-            uint256(1868548345305467327315244)) *
-            1588085682360 *
-            (10**12)) / uint256(1586020149070416559561266);
-
     constructor() ERC721("Eever", "EEVER") {
         for (uint256 i = 0; i < 10; i++) {
             Counters.Counter memory temp;
@@ -98,7 +92,9 @@ contract EverLand is ERC721Enumerable, Ownable {
     function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;
         payable(msg.sender).transfer(balance);
+    }
 
+    function withdrawGaia() public onlyOwner {
         uint256 gaiaBalance = IERC20(PGAIAA).balanceOf(address(this));
         IERC20(PGAIAA).transfer(msg.sender, gaiaBalance);
     }
@@ -149,7 +145,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         );
         require(_landType == 1 || _landType == 0);
         require(_landSize >= 0 && _landSize < 5);
-        // uint256 gaiaUSDC = getTokenPrice();
+        uint256 gaiaUSDC = getTokenPrice();
         uint8[5] memory _prices = [1, 3, 6, 12, 24];
         uint256 price = _landType == 1
             ? ((m_EpicPrice *
@@ -426,7 +422,6 @@ contract EverLand is ERC721Enumerable, Ownable {
         m_BurnList[_tokenId] = true;
     }
 
-    // ######## EverLand Config #########
     function getMaxSupply() external pure returns (uint256) {
         return MAX_SUPPLY;
     }
