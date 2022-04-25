@@ -137,6 +137,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         uint256 _landSize,
         uint256 _landType
     ) external {
+        require(!isContract(msg.sender), "This user is a contract");
         require(m_IsPublic, "Sale must be active to mint Lands");
         require(m_SaleDate < block.timestamp, "You can not mint yet");
         require(
@@ -254,6 +255,14 @@ contract EverLand is ERC721Enumerable, Ownable {
         (uint256 Re0, uint256 Re1, ) = pair2.getReserves();
         uint256 price2 = (Re0 * (10**30)) / Re1;
         return (price1 * price2) / (10**18);
+    }
+
+    function isContract(address _addr) public view returns (bool) {
+        uint32 size;
+        assembly {
+            size := extcodesize(_addr)
+        }
+        return (size > 0);
     }
 
     function _validateTypeOfLand(uint256 _id)
@@ -428,6 +437,14 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     function getMaxPurchase() external pure returns (uint256) {
         return MAX_PURCHASE;
+    }
+
+    function getTokenTypeBalance(uint256 _landSize, uint256 _landType)
+        external
+        view
+        returns (uint256)
+    {
+        return m_LandCounter[_landSize * 2 + _landType].current();
     }
 
     function setEpicPrice(uint256 _epicPrice) external onlyOwner {
