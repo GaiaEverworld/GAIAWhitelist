@@ -78,5 +78,57 @@ describe("Eever Land Contract", function () {
         await everland.connect(addr2).buyToken(100002, "10000000000000000000")
       );
     });
+
+    it("Buy", async function () {
+      await everland.connect(addr1).mint(3, 0, 1);
+      await everland
+        .connect(addr1)
+        .openTrade(100002, "10000000000000000000", 1);
+      expect(
+        await everland.connect(addr2).buyToken(100002, "10000000000000000000")
+      );
+    });
+
+    it("GetTokenTypeBalance", async function () {
+      await everland.connect(addr1).mint(3, 0, 1);
+      const counts = await everland.connect(addr1).getTokenTypeBalance(0, 1);
+      console.log("counts", parseInt(counts));
+      expect(await everland.connect(addr1).getTokenTypeBalance(0, 1));
+    });
+
+    it("IsContract", async function () {
+      const addr = await everland
+        .connect(addr1)
+        .isContract("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
+      console.log("isContract address", addr);
+      const contr = await everland
+        .connect(addr1)
+        .isContract("0x5FbDB2315678afecb367f032d93F642f64180aa3");
+      console.log("isContract contract", contr);
+      expect(
+        await everland
+          .connect(addr1)
+          .isContract("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
+      );
+    });
+
+    it("CustomReserve", async function () {
+      expect(
+        await everland
+          .connect(owner)
+          .customReserve(
+            "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+            [1, 2, 3]
+          )
+      );
+    });
+
+    it("RandomReserve", async function () {
+      expect(
+        await everland
+          .connect(owner)
+          .randomReserve("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", 10, 3, 1)
+      );
+    });
   });
 });
