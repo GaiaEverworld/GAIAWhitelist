@@ -19,8 +19,8 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     address private PGAIAA = 0x723B17718289A91AF252D616DE2C77944962d122;
 
-    uint256 private m_EpicPrice = 350; // $350
-    uint256 private m_RegularPrice = 175; // $175
+    uint256 private m_EpicPrice = 350;
+    uint256 private m_RegularPrice = 175;
 
     bytes32 private m_MerkleRoot;
 
@@ -232,8 +232,8 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     function generateTokenId(
         uint256 _id,
-        uint256 _landSize, // 1 x 1: 0, 3 x 3: 1, ..., 24 x 24: 4
-        uint256 _landType // epic 1, regular 0
+        uint256 _landSize,
+        uint256 _landType
     ) private pure returns (uint256) {
         return (_landSize * 2 + _landType) * 100000 + _id;
     }
