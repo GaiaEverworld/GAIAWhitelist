@@ -129,6 +129,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         uint256 _landSize,
         uint256 _landType
     ) external onlyOwner {
+        require(_address != address(0));
         require(_landType == 1 || _landType == 0);
         require(_landSize >= 0 && _landSize < 5);
         _safeMintMultiple(_address, _countOfLands, _landSize, _landType);
@@ -428,6 +429,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         external
         onlyOwner
     {
+        require(_address != address(0));
         for (uint256 i = 0; i < _ids.length; i++) {
             require(!_exists(_ids[i]), "Token id exists.");
             require(_validateIdOfLand(_ids[i]), "No Land Id");
@@ -520,6 +522,7 @@ contract EverLand is ERC721Enumerable, Ownable {
     }
 
     function setPGAIAContract(address _address) external onlyOwner {
+        require(_address != address(0));
         PGAIAA = _address;
     }
 
