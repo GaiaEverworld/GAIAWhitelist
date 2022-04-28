@@ -521,10 +521,6 @@ contract EverLand is ERC721Enumerable, Ownable {
         return PGAIAA;
     }
 
-    function setMarketingCommission(uint256 _commission) external onlyOwner {
-        m_MarketingCommission = _commission;
-    }
-
     function getMarketingCommission() external view returns (uint256) {
         return m_MarketingCommission;
     }
