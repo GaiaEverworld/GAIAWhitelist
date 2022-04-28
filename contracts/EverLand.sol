@@ -54,7 +54,6 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     mapping(uint256 => Auction) private m_Auctions;
     mapping(address => WhiteListAmounts) public m_WhiteListAmounts;
-    mapping(uint256 => bool) private m_BurnList;
 
     Auction[] private m_AuctionsData;
 
@@ -114,7 +113,7 @@ contract EverLand is ERC721Enumerable, Ownable {
             );
 
             require(_validateIdOfLand(tokenId), "No Land Id");
-            if (_exists(tokenId) || m_BurnList[tokenId]) continue;
+            if (_exists(tokenId)) continue;
 
             _safeMint(_address, tokenId);
             _countOfLands = _countOfLands.sub(1);
@@ -413,22 +412,16 @@ contract EverLand is ERC721Enumerable, Ownable {
         delete m_Auctions[_id];
     }
 
-    function customReserve(address _address, uint256[] memory ids)
+    function customReserve(address _address, uint256[] memory _ids)
         external
         onlyOwner
     {
-        for (uint256 i = 0; i < ids.length; i++) {
-            require(ids[i] <= MAX_SUPPLY);
-            require(!_exists(ids[i]), "Token id exists.");
-            if (m_BurnList[ids[i]]) m_BurnList[ids[i]] = false;
+        for (uint256 i = 0; i < _ids.length; i++) {
+            require(!_exists(_ids[i]), "Token id exists.");
+            require(_validateIdOfLand(_ids[i]), "No Land Id");
 
-            _safeMint(_address, ids[i]);
+            _safeMint(_address, _ids[i]);
         }
-    }
-
-    function burn(uint256 _tokenId) external onlyOwner {
-        _burn(_tokenId);
-        m_BurnList[_tokenId] = true;
     }
 
     function getMaxSupply() external pure returns (uint256) {
