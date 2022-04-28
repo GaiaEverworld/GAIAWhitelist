@@ -212,9 +212,8 @@ contract EverLand is ERC721Enumerable, Ownable {
             "WhiteList OverAmount"
         );
 
-        bytes32 node = keccak256(abi.encodePacked(_index, msg.sender, _amount));
         require(
-            MerkleProof.verify(_merkleProof, m_MerkleRoot, node),
+            _verifyMerkleRoot(_index, _amount, msg.sender, _merkleProof),
             "Invalid proof."
         );
 
@@ -228,6 +227,16 @@ contract EverLand is ERC721Enumerable, Ownable {
         for (uint256 i = 0; i < _countOfLands; i++) {
             _safeMint(msg.sender, _ids[i]);
         }
+    }
+
+    function _verifyMerkleRoot(
+        uint256 _index,
+        uint256 _amount,
+        address _address,
+        bytes32[] memory _merkleProof
+    ) private pure returns (bool) {
+        bytes32 node = keccak256(abi.encodePacked(_index, _address, _amount));
+        return MerkleProof.verify(_merkleProof, m_MerkleRoot, node);
     }
 
     function generateTokenId(
