@@ -495,6 +495,7 @@ contract EverLand is ERC721Enumerable, Ownable {
     }
 
     function setSaleDate(uint256 _date) external onlyOwner {
+        require(_date > block.timestamp);
         m_SaleDate = _date;
     }
 
