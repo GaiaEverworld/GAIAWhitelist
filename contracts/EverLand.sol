@@ -95,7 +95,10 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     function withdrawGaia() public onlyOwner {
         uint256 gaiaBalance = IERC20(PGAIAA).balanceOf(address(this));
-        IERC20(PGAIAA).transfer(msg.sender, gaiaBalance);
+        require(
+            IERC20(PGAIAA).transfer(msg.sender, gaiaBalance),
+            "Failed Withdraw"
+        );
     }
 
     function _safeMintMultiple(
