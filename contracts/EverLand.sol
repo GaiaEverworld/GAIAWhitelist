@@ -137,7 +137,9 @@ contract EverLand is ERC721Enumerable, Ownable {
     function mint(
         uint256 _countOfLands,
         uint256 _landSize,
-        uint256 _landType
+        uint256 _landType,
+        uint256 epicPrice,
+        uint256 regularPrice
     ) external {
         require(!isContract(msg.sender), "This user is a contract");
         require(m_IsPublic, "Sale must be active to mint Lands");
@@ -146,6 +148,7 @@ contract EverLand is ERC721Enumerable, Ownable {
             _countOfLands > 0 && _countOfLands <= MAX_PURCHASE,
             "Can only mint 200 tokens at a time"
         );
+        require(epicPrice == m_EpicPrice && regularPrice == m_RegularPrice);
         require(_landType == 1 || _landType == 0);
         require(_landSize >= 0 && _landSize < 5);
         uint256 gaiaUSDC = getTokenPrice();
