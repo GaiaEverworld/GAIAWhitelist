@@ -170,7 +170,6 @@ contract EverLand is ERC721Enumerable, Ownable {
     }
 
     function selectedMint(
-        uint256 _countOfLands,
         uint256[] memory _ids,
         uint256 _index,
         uint256 _amount,
@@ -178,25 +177,21 @@ contract EverLand is ERC721Enumerable, Ownable {
     ) external {
         require(m_IsMintable, "Sale must be active to mint Lands");
         require(
-            _countOfLands > 0 && _countOfLands <= MAX_PURCHASE,
+            _ids.length > 0 && _ids.length <= MAX_PURCHASE,
             "Can only mint 200 tokens at a time"
         );
-        require(
-            _ids.length == _countOfLands,
-            "Length of id array must be count params"
-        );
-        for (uint256 i = 0; i < _countOfLands; i++) {
-            for (uint256 j = i + 1; j < _countOfLands; j++) {
+        for (uint256 i = 0; i < _ids.length; i++) {
+            for (uint256 j = i + 1; j < _ids.length; j++) {
                 require(_ids[i] != _ids[j], "ids must be not same each other");
             }
         }
-        for (uint256 i = 0; i < _countOfLands; i++) {
+        for (uint256 i = 0; i < _ids.length; i++) {
             require(_validateIdOfLand(_ids[i]), "No Land Id");
             require(_exists(_ids[i]) == false, "Lands were already minted");
         }
         uint256 epicLands = 0;
         uint256 regularLands = 0;
-        for (uint256 i = 0; i < _countOfLands; i++) {
+        for (uint256 i = 0; i < _ids.length; i++) {
             validateLand memory data = _validateTypeOfLand(_ids[i]);
             if (data.landType == 1) {
                 epicLands = epicLands + data.landSize * data.landSize;
@@ -224,7 +219,7 @@ contract EverLand is ERC721Enumerable, Ownable {
             m_WhiteListAmounts[msg.sender].regular +
             regularLands;
 
-        for (uint256 i = 0; i < _countOfLands; i++) {
+        for (uint256 i = 0; i < _ids.length; i++) {
             _safeMint(msg.sender, _ids[i]);
         }
     }
