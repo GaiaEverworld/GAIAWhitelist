@@ -88,6 +88,8 @@ contract EverLand is ERC721Enumerable, Ownable {
         }
     }
 
+    function renounceOwnership() public override onlyOwner {}
+
     function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;
         payable(msg.sender).transfer(balance);
