@@ -373,7 +373,7 @@ contract EverLand is ERC721Enumerable, Ownable {
             "Min Price"
         );
         require(
-            m_Auctions[_id].price <= msg.value,
+            m_Auctions[_id].price == msg.value,
             "Error, price is not match"
         );
         require(m_Auctions[_id].unit == 2, "Error, unit is not match");
@@ -393,7 +393,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         require(m_IsActive, "Sale must be active to mint GaiaLand");
         require(ownerOf(_id) != msg.sender, "Can not buy what you own");
         require(m_Auctions[_id].id == _id, "Item not listed currently");
-        require(m_Auctions[_id].price <= _price, "Error, price is not match");
+        require(m_Auctions[_id].price == _price, "Error, price is not match");
         require(_price.mul(m_MarketingCommission).div(1000) >= 1, "Min Price");
         require(m_Auctions[_id].unit == 1, "Error, unit is not match");
         address _previousOwner = m_Auctions[_id].creator;
