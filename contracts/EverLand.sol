@@ -26,9 +26,9 @@ contract EverLand is ERC721Enumerable, Ownable {
 
     uint256 private m_Reserve = 50000;
 
-    bool private m_IsMintable = false;
-    bool private m_IsPublic = false;
-    bool private m_IsActive = false;
+    bool private m_IsMintable;
+    bool private m_IsPublic;
+    bool private m_IsActive;
     uint256 private m_SaleDate = 1648756800;
 
     string private m_baseURI;
