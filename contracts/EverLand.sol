@@ -229,7 +229,7 @@ contract EverLand is ERC721Enumerable, Ownable {
         uint256 _amount,
         address _address,
         bytes32[] memory _merkleProof
-    ) private pure returns (bool) {
+    ) private view returns (bool) {
         bytes32 node = keccak256(abi.encodePacked(_index, _address, _amount));
         return MerkleProof.verify(_merkleProof, m_MerkleRoot, node);
     }
